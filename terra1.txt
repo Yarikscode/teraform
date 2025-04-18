@@ -1,0 +1,97 @@
+Код для развёртывания Managed Service for YDB:
+
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+provider "yandex" {
+  zone = "ru-central1-a"
+}
+
+resource "yandex_ydb_database_serverless" "this" {
+  name = "test-ydb-serverless"
+} 
+
+# terraform init 
+
+На этом этапе происходит:
+
+Инициализация backend для хранения state
+State хранит текущее состояние инфраструктуры, управляемой Terraform. Backend определяет, где Terraform хранит state
+.
+Загрузка провайдеров
+Провайдер позволяет взаимодействовать с Yandex Cloud.
+
+Загрузка модулей, если они используются
+Модули позволяют организовывать и структурировать код Terraform, обеспечивая его повторное использование и управление зависимостями в рамках инфраструктурного проекта.
+
+#terraform plan 
+
+На этом этапе происходит:
+
+Сравнение конфигурации Terraform с реальной инфраструктурой
+
+Отображение плана выполнения
+
+Атрибуты в плане могут быть отражены как known after apply:
+
+Если какие-то из атрибутов в коде не указаны. В этом случаем будут использоваться их default-значения.
+Если какие-то из атрибутов неизвестны на момент планирования, например id, created_at.
+
+💻 Вы можете выгрузить план в файл, чтобы позднее применить его:
+$ terraform plan -out=<PLAN_FILE> 
+
+#terraform apply
+
+Когда план выполнения будет отображать желаемые результаты, можно применить код и создать реальную инфраструктуру. В этом поможет команда:
+
+terraform apply <PLAN_FILE> 
+
+Apply complete! Resources: 1 added, 0 changed, 0 destroyed
+
+
+#Создаем сервисный аккаунт
+
+yc iam service-account create --name terrabot
+
+yc resource-manager folder add-access-binding b*** --role editor --subject serviceAccount:aj****
+
+yc resource-manager folder add-access-binding bo --role admin --subject serviceAccount:a 
+
+
+
+
+yc iam key create \
+  --service-account-id aje* > \
+  --folder-name b1g*o \
+  --output key.json
+
+
+yc config set service-account-key key.json
+yc config set cloud-id b*
+yc config set folder-id b1*
+
+
+export YC_TOKEN=$(yc iam create-token)
+export YC_CLOUD_ID=$(yc config get cloud-id)
+export YC_FOLDER_ID=$(yc config get folder-id)
+
+#Cоздаем первую infra-stage
+
+terraform init
+
+terraform plan - смотрим план
+
+terraform apply - применяем
+
+terraform destroy 
+
+terraform apply -replace="random_string.bucket_name" - заменить выбранный ресурс
+
+terraform init --upgrade - загрузка нового провайдера после добавления
+
